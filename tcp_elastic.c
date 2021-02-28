@@ -1,7 +1,11 @@
 #include <linux/module.h>
 #include <net/tcp.h>
 
+#ifdef BIT
 #define SCALE	100
+#else
+#define SCALE	1
+#endif
 struct elastic {
 	u32	ai;
 	u32	maxrtt;
