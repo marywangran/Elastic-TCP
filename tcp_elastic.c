@@ -28,7 +28,7 @@ static void elastic_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 		tcp_slow_start(tp, acked);
 	else {
 		tp->snd_cwnd_cnt +=
-		    int_sqrt(ca->rtt_max * tp->snd_cwnd / ca->rtt_current) /
+		    int_sqrt(ca->rtt_max / ca->rtt_current * tp->snd_cwnd) /
 		    tp->snd_cwnd;
 		if (tp->snd_cwnd_cnt >= tp->snd_cwnd) {
 			tp->snd_cwnd_cnt = 0;
