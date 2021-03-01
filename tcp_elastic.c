@@ -5,7 +5,6 @@ struct elastic {
 	u32 ai;
 	u32 rtt_max;
 	u32 rtt_current;
-	u32 rtt_base;
 };
 
 static void elastic_init(struct sock *sk)
@@ -15,7 +14,6 @@ static void elastic_init(struct sock *sk)
 	ca->ai = 0;
 	ca->rtt_max = 0;
 	ca->rtt_current = 1;
-	ca->rtt_base = 0x7FFFFFFF;
 }
 
 static void elastic_cong_avoid(struct sock *sk, u32 ack, u32 acked)
@@ -30,7 +28,7 @@ static void elastic_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 		tcp_slow_start(tp, acked);
 	else {
 		tp->snd_cwnd_cnt +=
-		    int_sqrt(ca->rtt_max / ca->rtt_current * tp->snd_cwnd) /
+		    int_sqrt(ca->rtt_max * tp->snd_cwnd / ca->rtt_current) /
 		    tp->snd_cwnd;
 		if (tp->snd_cwnd_cnt >= tp->snd_cwnd) {
 			tp->snd_cwnd_cnt = 0;
@@ -42,21 +40,17 @@ static void elastic_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 static void elastic_rtt_calc(struct sock *sk, const struct ack_sample *sample)
 {
 	struct elastic *ca = inet_csk_ca(sk);
-	u32 rtt, rtt_base, rtt_max;
+	u32 rtt, rtt_max;
 
 	rtt = sample->rtt_us + 1;
 
 	rtt_max = ca->rtt_max;
-	rtt_base = ca->rtt_base;
 
 	ca->rtt_current = rtt;
-	if (rtt < rtt_base || rtt_base == 0)
-		rtt_base = rtt;
 
 	if (rtt > rtt_max || rtt_max == 0)
 		rtt_max = rtt;
 
-	ca->rtt_base = rtt_base;
 	ca->rtt_max = rtt_max;
 }
 
