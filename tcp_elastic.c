@@ -41,7 +41,7 @@ static void elastic_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 			
 			tp->snd_cwnd_cnt -= tp->snd_cwnd*SCALE;
 			if (tp->snd_cwnd_cnt > remain) {
-				tp->snd_cwnd_cnt += tp->snd_cwnd;
+				tp->snd_cwnd_cnt = remain;
 				break;
 			}
 			tp->snd_cwnd++;
